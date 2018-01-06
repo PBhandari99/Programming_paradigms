@@ -13,12 +13,14 @@ void swap(void *vp1, void *vp2, int size) {
 
 void* lSerach(void* key, void* base, int n, int elemSize) {
     for (int i=0; i<n; i++) {
-        /* This method add i time elemSize to the address of base
-         * which acts as a base-address.
-         * - (char*): This type cast is done because it's confusing to
-         *   do pointer arithmetic on void pointers and since char*
-         *   are of size 1 byte it's easier. 
-         * - And assigning a char* address to void* is legal.*/
+/* 
+ *         This method add i time elemSize to the address of base
+ *         which acts as a base-address.
+int string_comp(void* data_file, int address_offset, const string& player) {
+ *         - (char*): This type cast is done for pointer arithmetic
+ *                    operations and since char are of size 1 byte it's easier.
+ *         -          And assigning a char* address to void* is legal.
+ *  */
         void* elemAddr = (char*)base + i*elemSize;
         if (memcmp(key, elemAddr, elemSize)==0)
             return elemAddr;
