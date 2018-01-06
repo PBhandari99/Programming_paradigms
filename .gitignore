@@ -53,3 +53,6 @@ dkms.conf
 
 # dataFiles.
 assn-2-six-degrees-data
+# o files.
+*six-degrees
+*six-degrees-linux
