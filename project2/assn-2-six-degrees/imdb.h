@@ -104,7 +104,11 @@ class imdb {
   int string_comp(const void*,const int, const string&) const;
   void get_movies_from_actor(const int, std::vector<film>&) const;
   void add_movies_to_vec(const int, std::vector<film>&) const;
-
+  
+  int search_movie_data_array(const void*, const film&) const; 
+  int comp_films(const void*, const int, const film&) const;
+  void get_actors(const void*, const int, vector<string>&) const;
+  void add_actors_to_vec(const int, const int, const int, vector<string>&) const;
   // mplayerarked as private so imdbs can't be copy constructed or reassigned.
   // if we were to allow this, we'd alias open files and accidentally close
   // files prematurely.. (do NOT implement these... since the client will

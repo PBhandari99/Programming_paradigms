@@ -200,7 +200,7 @@ static void queryForActors(const imdb& db)
  * that the imdb constructor is called, 
  */
 
-int main(int argc, char **argv)
+int main()
 {
   imdb db(determinePathToData());
   std::cout << "after init." << "\n";
