@@ -100,14 +100,14 @@ class imdb {
   static const void *acquireFileMap(const string& fileName, struct fileInfo& info);
   static void releaseFileMap(struct fileInfo& info);
 
-  int search_data_array(const void*, const string&) const;
-  int string_comp(const void*,const int, const string&) const;
+  int search_data_array(const string&) const;
+  int string_comp(const int, const string&) const;
   void get_movies_from_actor(const int, std::vector<film>&) const;
   void add_movies_to_vec(const int, std::vector<film>&) const;
   
-  int search_movie_data_array(const void*, const film&) const; 
-  int comp_films(const void*, const int, const film&) const;
-  void get_actors(const void*, const int, vector<string>&) const;
+  int search_movie_data_array(const film&) const; 
+  int comp_films(const int, const film&) const;
+  void get_actors(const int, vector<string>&) const;
   void add_actors_to_vec(const int, const int, const int, vector<string>&) const;
   // mplayerarked as private so imdbs can't be copy constructed or reassigned.
   // if we were to allow this, we'd alias open files and accidentally close

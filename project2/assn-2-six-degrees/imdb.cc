@@ -29,13 +29,10 @@ bool imdb::good() const
 
 bool imdb::getCredits(const string& player, vector<film>& films) const {
     // int first_actor_offset;
-    int actor_index = search_data_array(actorFile, player);
+    int actor_index = search_data_array(player);
     if (actor_index > 0) {
         int actor_offset = *((int*)actorFile + actor_index);
         get_movies_from_actor(actor_offset, films);
-        for(size_t i=0; i<films.size(); ++i) {
-            std::cout << films[i].title << "\n";
-        }
         return true;
     }
     return false; 
@@ -80,7 +77,6 @@ void imdb::get_movies_from_actor(const int actor_offset, std::vector<film>& film
 void imdb::add_movies_to_vec(const int offset_into_no_of_movies, std::vector<film>& films) const {
     // This is the actual data that is contained in that offset.
     int num_of_movies = *(short*)((char*)actorFile + offset_into_no_of_movies);
-    std::cout << "The number of movies is: " << num_of_movies << "\n";
     // This offset contains the offset that leads to the actual movie names in movieFile.
     // The %, modulus is done because if the number of bytes used in the name of the actor and
     // the number of movies he/she is appeared in is not a multiple of four than the extra bytes
@@ -93,7 +89,6 @@ void imdb::add_movies_to_vec(const int offset_into_no_of_movies, std::vector<fil
         // u_int8_t cast is done since the year of release is only 1 byte.
         film_obj.year = *((u_int8_t*)movie + film_obj.title.length()+1) + 1900;
         films.push_back(film_obj);
-        std::cout << film_obj.title << " was released in " << film_obj.year << "\n";
     }
 }
 
@@ -103,20 +98,19 @@ void imdb::add_movies_to_vec(const int offset_into_no_of_movies, std::vector<fil
  * & return -1 if nothing is found as a match or return the offset of
  * the match string.
  *
- * @param: data_file: pointer to the data file to be search.
  * @param: string to search for.
  *
  * @return: -1 if no match is found & offset of the matching
  *         string in the file if the match is found.
  *  */
-int imdb::search_data_array(const void* data_file, const string& player) const {
+int imdb::search_data_array(const string& player) const {
     int start, mid, end; 
     start = 1;
-    end = *(int*)data_file;
+    end = *(int*)actorFile;
     int player_is = 0; 
     while(start <= end) {
         mid = (start+end)/2;
-        player_is = string_comp(data_file, mid, player);
+        player_is = string_comp(mid, player);
         if (player_is == 0) {
             return mid;
         } 
@@ -133,7 +127,6 @@ int imdb::search_data_array(const void* data_file, const string& player) const {
 /* 
  * Method: string_comp: Compares to strings and return the result.
  *
- * @param data_file: The data_file where one of the string to compare is located
  * @param address_offset: This int contains the offset in the data_file where one of the
  *                        strings is located.
  * @param player: String to compare.
@@ -141,9 +134,9 @@ int imdb::search_data_array(const void* data_file, const string& player) const {
  * @return: Returns an int. Returns 0 if the strings are same. -1 if player is smaller and 1
  *          if greater.
  *  */
-int imdb::string_comp(const void* data_file, const int address_offset, const string& player) const{
-    int actor_offset = *((int*)data_file + address_offset);
-    char* actor_name = (char*)data_file + actor_offset;
+int imdb::string_comp(const int address_offset, const string& player) const{
+    int actor_offset = *((int*)actorFile + address_offset);
+    char* actor_name = (char*)actorFile + actor_offset;
     if (std::string(actor_name) > player) {
         return -1;
     }
@@ -153,15 +146,15 @@ int imdb::string_comp(const void* data_file, const int address_offset, const str
     return 0; 
 }
 
-// TODO: Try to merge the two binary serach method.
-int imdb::search_movie_data_array(const void* data_file, const film& movie) const {
+// binary search the movieFile array of memory for matching movie.
+int imdb::search_movie_data_array(const film& movie) const {
     int start, mid, end; 
     start = 1;
-    end = *(int*)data_file;
+    end = *(int*)movieFile;
     int player_is = 0; 
     while(start <= end) {
         mid = (start+end)/2;
-        player_is = comp_films(data_file, mid, movie);
+        player_is = comp_films(mid, movie);
         if (player_is == 0) {
             return mid;
         } 
@@ -175,12 +168,14 @@ int imdb::search_movie_data_array(const void* data_file, const film& movie) cons
     return -1;
 }
 
-int imdb::comp_films(const void* data_file, const int address_offset, const film& movie) const {
+// compare two movies if there is a match, helper method for the binary search.
+int imdb::comp_films(const int address_offset, const film& movie) const {
     film movie_search;
-    int movie_offset = *((int*)data_file + address_offset);
-    char* movie_name = (char*)data_file + movie_offset;
+    int movie_offset = *((int*)movieFile+ address_offset);
+    char* movie_name = (char*)movieFile + movie_offset;
     movie_search.title = std::string(movie_name);
 
+    // As the year is a single byte and is counted form 1900, hence the addition and u_int8_t cast.
     movie_search.year = *((u_int8_t*)movie_name + movie_search.title.length()+1) + 1900;
     if(movie == movie_search) {
         return 0;
@@ -191,6 +186,7 @@ int imdb::comp_films(const void* data_file, const int address_offset, const film
     return 1;
 }
 
+// Adds the actor in the movie to the vector.
 void imdb::add_actors_to_vec(const int no_of_actors, const int movie_offset,
         const int offset_to_actor_offset, vector<string>& players) const {
     int actor_offset;
@@ -201,17 +197,20 @@ void imdb::add_actors_to_vec(const int no_of_actors, const int movie_offset,
     }
 }
 
-// TODO: Get rid of the first parameter, data_file, and just use the globally decleared variable.
-void imdb::get_actors(const void* data_file, const int movie_index, vector<string>& players) const {
-    int movie_offset = *((int*)data_file + movie_index);
+
+// Helper method to get all the actors in the given movie.
+void imdb::get_actors(const int movie_index, vector<string>& players) const {
+    int movie_offset = *((int*)movieFile + movie_index);
     int length_of_movie_title_w_year = std::string(
-            (char*)data_file + movie_offset).length() + 1 + 1; 
+            (char*)movieFile + movie_offset).length() + 1 + 1; 
     // If the numer of bytes needed for the name of the movie with "/0" and 1 byte year
     // is odd than one extra byte of "/0" is added at the end of year before number of actors.
     if (length_of_movie_title_w_year % 2!=0) {
         length_of_movie_title_w_year += 1;
     }
-    int no_of_actors = *(short*)((char*)data_file + movie_offset + length_of_movie_title_w_year);
+    int no_of_actors = *(short*)((char*)movieFile + movie_offset + length_of_movie_title_w_year);
+    // If the length_of_movie_title_w_year and number of actors is multiple of 4 then no need
+    // to pad with extra 2 bytes.
     if((length_of_movie_title_w_year+2)%4==0) {
         int offset_to_actor_offset = length_of_movie_title_w_year + 2;
         add_actors_to_vec(no_of_actors, offset_to_actor_offset, movie_offset, players);
@@ -223,9 +222,9 @@ void imdb::get_actors(const void* data_file, const int movie_index, vector<strin
 }
 
 bool imdb::getCast(const film& movie, vector<string>& players) const {
-    int movie_index = search_data_array(movieFile, movie.title);
+    int movie_index = search_movie_data_array(movie);
     if (movie_index > 0) {
-        get_actors(movieFile, movie_index, players);
+        get_actors(movie_index, players);
         return true;
     }
     return false;
