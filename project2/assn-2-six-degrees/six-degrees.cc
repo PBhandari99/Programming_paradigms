@@ -39,6 +39,53 @@ static string promptForActor(const string& prompt, const imdb& db)
 	 << "Please try again." << endl;
   }
 }
+/* 
+ * This method does a BFS and return the Path to the target from source.
+ *
+ * @param source first actor to where the search to start.
+ * @param target the last actor to search for.
+ * @param imdb instance to use.
+ *
+ * @return zero when exiting the method.
+ *  */
+int generateShortestPath(string source, string target, const imdb& db) {
+    list<path> partialPaths;
+    set<string> seenActors;
+    set<film> seenFilms;
+
+    path startPlyer(source);
+    partialPaths.push_back(startPlyer);
+    while(!partialPaths.empty() && partialPaths.front().getLength() <= 5) {
+        path initial_path = partialPaths.front();
+        partialPaths.pop_front();
+        const string last_actor = initial_path.getLastPlayer();
+        vector<film> films;
+        // TODO: check the return value for no result cases.
+        db.getCredits(last_actor, films);
+        for (auto movie : films) {
+            if (seenFilms.find(movie) == seenFilms.end()) {
+                seenFilms.insert(movie);
+                vector<string> players;
+                db.getCast(movie, players);
+                for (auto actor : players) {
+                    if (seenActors.find(actor) == seenActors.end()) {
+                        seenActors.insert(actor);
+                        path clone_path = initial_path;
+                        clone_path.addConnection(movie, actor);
+                        if (actor == target) {
+                            cout << clone_path;
+                            return 0;
+                        }
+                        partialPaths.push_back(clone_path);
+                    }
+                }
+            }
+        }
+    }
+    cout << endl << "No path between " << source << " and " << target << endl << endl;
+    return 0;
+}
+
 
 /**
  * Serves as the main entry point for the six-degrees executable.
@@ -72,11 +119,9 @@ int main(int argc, const char *argv[])
     if (source == target) {
       cout << "Good one.  This is only interesting if you specify two different people." << endl;
     } else {
-      // replace the following line by a call to your generateShortestPath routine... 
-      cout << endl << "No path between those two people could be found." << endl << endl;
+      generateShortestPath(source, target, db);
     }
   }
-  
   cout << "Thanks for playing!" << endl;
   return 0;
 }

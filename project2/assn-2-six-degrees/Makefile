@@ -2,7 +2,7 @@
 ## Makefile for CS107 Assignment 2: Six Degrees
 ##
 
-CPPFLAGS = -g -Wall
+CPPFLAGS = -g -Wall -std=c++0x
 CXX = g++
 LDFLAGS =
 

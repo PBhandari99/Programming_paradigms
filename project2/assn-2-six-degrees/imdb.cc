@@ -146,6 +146,20 @@ int imdb::string_comp(const int address_offset, const string& player) const{
     return 0; 
 }
 
+
+/***********************************************/
+/******************Moves************************/
+/***********************************************/
+bool imdb::getCast(const film& movie, vector<string>& players) const {
+    int movie_index = search_movie_data_array(movie);
+    if (movie_index > 0) {
+        get_actors(movie_index, players);
+        return true;
+    }
+    return false;
+}
+
+
 // binary search the movieFile array of memory for matching movie.
 int imdb::search_movie_data_array(const film& movie) const {
     int start, mid, end; 
@@ -221,14 +235,6 @@ void imdb::get_actors(const int movie_index, vector<string>& players) const {
     }
 }
 
-bool imdb::getCast(const film& movie, vector<string>& players) const {
-    int movie_index = search_movie_data_array(movie);
-    if (movie_index > 0) {
-        get_actors(movie_index, players);
-        return true;
-    }
-    return false;
-}
 
 imdb::~imdb()
 {
