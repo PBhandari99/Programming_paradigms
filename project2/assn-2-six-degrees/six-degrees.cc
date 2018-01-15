@@ -61,11 +61,13 @@ int generateShortestPath(string source, string target, const imdb& db) {
         const string last_actor = initial_path.getLastPlayer();
         vector<film> films;
         // TODO: check the return value for no result cases.
+        // and also cache the results, these calls are expensive.
         db.getCredits(last_actor, films);
         for (auto movie : films) {
             if (seenFilms.find(movie) == seenFilms.end()) {
                 seenFilms.insert(movie);
                 vector<string> players;
+                // TODO: Cache these calls.
                 db.getCast(movie, players);
                 for (auto actor : players) {
                     if (seenActors.find(actor) == seenActors.end()) {
