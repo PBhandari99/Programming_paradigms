@@ -1,10 +1,12 @@
-#include <vector>
-#include <list>
-#include <set>
-#include <string>
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
-#include <cstdlib>
+#include <list>
+#include <map>
+#include <utility>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "imdb.h"
 #include "path.h"
@@ -52,6 +54,8 @@ int generateShortestPath(string source, string target, const imdb& db) {
     list<path> partialPaths;
     set<string> seenActors;
     set<film> seenFilms;
+    map<string, vector<film>> films_by_actor;
+    map<film, vector<string>> actors_by_movies;
 
     path startPlyer(source);
     partialPaths.push_back(startPlyer);
@@ -60,15 +64,26 @@ int generateShortestPath(string source, string target, const imdb& db) {
         partialPaths.pop_front();
         const string last_actor = initial_path.getLastPlayer();
         vector<film> films;
-        // TODO: check the return value for no result cases.
-        // and also cache the results, these calls are expensive.
-        db.getCredits(last_actor, films);
+        if (films_by_actor.find(last_actor) == films_by_actor.end()) {
+            db.getCredits(last_actor, films);
+            std::pair<string, vector<film>> actor_film_pair(last_actor, films);  
+            films_by_actor.insert(actor_film_pair);
+        }
+        else {
+            films = films_by_actor[last_actor];
+        }
         for (auto movie : films) {
             if (seenFilms.find(movie) == seenFilms.end()) {
                 seenFilms.insert(movie);
                 vector<string> players;
-                // TODO: Cache these calls.
-                db.getCast(movie, players);
+                if (actors_by_movies.find(movie) == actors_by_movies.end()) {
+                    db.getCast(movie, players);
+                    std::pair<film, vector<string>> movie_actors_pair(movie, players);  
+                    actors_by_movies.insert(movie_actors_pair);
+                }
+                else {
+                    players = actors_by_movies[movie];
+                }
                 for (auto actor : players) {
                     if (seenActors.find(actor) == seenActors.end()) {
                         seenActors.insert(actor);
