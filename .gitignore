@@ -17,6 +17,7 @@
 *.pch
 
 # Libraries
+.pure
 *.lib
 *.a
 *.la
@@ -53,8 +54,11 @@ dkms.conf
 
 # dataFiles.
 assn-2-six-degrees-data
+assn-3-vector-hashset
 # o files.
 *six-degrees
 *six-degrees-linux
 *imdb-test
 *imdb-test-linux
+thesaurus-lookup-linux
+thesaurus-lookup-solaris
