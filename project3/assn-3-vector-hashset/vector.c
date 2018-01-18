@@ -17,22 +17,45 @@ void VectorNew(vector *v, int elemSize, VectorFreeFunction freeFn, int initialAl
 }
 
 void VectorDispose(vector *v)
-{}
+{
+    if (v->freeFn != NULL) {
+        for (int i=0; i<v->vectorLength; ++i) {
+            v->freeFn((char*)v->elements + (i*v->elemSize));
+        }
+    }
+    free(v->elements);
+}
 
 int VectorLength(const vector *v)
-{ return 0; }
+{ 
+    return v->vectorLength; 
+}
 
 void *VectorNth(const vector *v, int position)
-{ return NULL; }
+{ 
+    return NULL; 
+}
 
 void VectorReplace(vector *v, const void *elemAddr, int position)
 {}
 
 void VectorInsert(vector *v, const void *elemAddr, int position)
-{}
+{
+
+
+}
 
 void VectorAppend(vector *v, const void *elemAddr)
-{}
+{
+    if (v->vectorLength == v->maxVectorLength) {
+        v->maxVectorLength = 2*v->maxVectorLength;
+        v->elements = realloc(v->elements, v->maxVectorLength);
+        assert(v->elements != NULL);
+    }
+    void* targetAddress = (char*)v->elements + ((v->vectorLength-1) * v->elemSize);
+    memcpy(targetAddress, elemAddr, v->elemSize);
+    v->vectorLength++;
+}
 
 void VectorDelete(vector *v, int position)
 {}
@@ -46,4 +69,4 @@ void VectorMap(vector *v, VectorMapFunction mapFn, void *auxData)
 static const int kNotFound = -1;
 
 int VectorSearch(const vector *v, const void *key, VectorCompareFunction searchFn, int startIndex, bool isSorted)
-{ return -1; } 
+{ return kNotFound; } 

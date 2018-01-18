@@ -47,8 +47,9 @@ void stackPop(stack* s, void* buffer) {
 
     /* source_addr from where the element is to be poped.
      * The cast to the char* is done so that the pointer arithmetic can be performed
-     * in a very simple way as all char*(s) are 4bytes long and we can't perform
-     * pointer arithmetic on void*. */
+     * in a very simple way as all char(s) are 1 bytes long, incrementing
+     * char* will increament the pointer by 1 unit.
+     */
     void* source_addr = (char*)s->elems + (s->logical_length * s->elem_size);
     memcpy(buffer, source_addr, s->elem_size);
 }
