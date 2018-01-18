@@ -5,7 +5,16 @@
 #include <assert.h>
 
 void VectorNew(vector *v, int elemSize, VectorFreeFunction freeFn, int initialAllocation)
-{}
+{
+    assert(elemSize > 0);
+    assert(initialAllocation > 0);
+    v->elemSize = elemSize;
+    v->maxVectorLength = initialAllocation;
+    v->vectorLength = 0;
+    v->elements = malloc(initialAllocation * elemSize);
+    assert(v->elements != NULL);
+    v->freeFn = freeFn; 
+}
 
 void VectorDispose(vector *v)
 {}
@@ -35,5 +44,6 @@ void VectorMap(vector *v, VectorMapFunction mapFn, void *auxData)
 {}
 
 static const int kNotFound = -1;
+
 int VectorSearch(const vector *v, const void *key, VectorCompareFunction searchFn, int startIndex, bool isSorted)
 { return -1; } 

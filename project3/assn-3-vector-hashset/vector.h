@@ -65,10 +65,21 @@ typedef void (*VectorFreeFunction)(void *elemAddr);
  * the privacy of the representation and initialize,
  * dispose of, and otherwise interact with a
  * vector using those functions defined in this file.
+ *
+ * elements: The elements that the vector contains, which is allocate in 
+ *           the free space using malloc.
+ * elemSize: Size of each element of the vector.
+ * vectorLength: Current size of the vector.
+ * maxVectorLength: Allocated length of the vector with the malloc or realloc.
+ * freeFn: Pointer to the function that deallocates the individual elements.
  */
 
 typedef struct {
-  // to be filled in by you
+    void* elements;
+    int elemSize;
+    int vectorLength;
+    int maxVectorLength;
+    VectorFreeFunction freeFn;
 } vector;
 
 /** 

@@ -54,7 +54,7 @@ dkms.conf
 
 # dataFiles.
 assn-2-six-degrees-data
-assn-3-vector-hashset
+assn-3-vector-hashset-data
 # o files.
 *six-degrees
 *six-degrees-linux
