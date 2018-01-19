@@ -4,9 +4,10 @@
 #include <string.h>
 #include <assert.h>
 
+
 void VectorNew(vector *v, int elemSize, VectorFreeFunction freeFn, int initialAllocation)
 {
-    assert(elemSize > 0);
+    assert(elemSize >= 0);
     assert(initialAllocation > 0);
     v->elemSize = elemSize;
     v->maxVectorLength = initialAllocation;
@@ -15,6 +16,7 @@ void VectorNew(vector *v, int elemSize, VectorFreeFunction freeFn, int initialAl
     assert(v->elements != NULL);
     v->freeFn = freeFn; 
 }
+
 
 void VectorDispose(vector *v)
 {
@@ -26,20 +28,23 @@ void VectorDispose(vector *v)
     free(v->elements);
 }
 
+
 int VectorLength(const vector *v)
 { 
     return v->vectorLength; 
 }
 
+
 void *VectorNth(const vector *v, int position)
 { 
-    assert(position>0 || position < v->vectorLength);
+    assert(position>=0 || position < v->vectorLength);
     return ((char*)v->elements + (position * v->elemSize));
 }
 
+
 void VectorReplace(vector *v, const void *elemAddr, int position)
 {
-    assert(position>0 || position < v->vectorLength);
+    assert(position>=0 || position < v->vectorLength);
     void* targetAddress = (char*)v->elements + (position + v->elemSize);
     if(v->freeFn != NULL) {
         v->freeFn(targetAddress);
@@ -47,9 +52,10 @@ void VectorReplace(vector *v, const void *elemAddr, int position)
     memcpy(targetAddress, elemAddr, v->elemSize);
 }
 
+
 void VectorInsert(vector *v, const void *elemAddr, int position)
 {
-    assert(position > 0 || position < v->vectorLength);
+    assert(position >= 0 || position < v->vectorLength);
     if (v->vectorLength == v->maxVectorLength) {
         v->maxVectorLength = 2*v->maxVectorLength;
         v->elements = realloc(v->elements, v->maxVectorLength*v->elemSize);
@@ -63,6 +69,7 @@ void VectorInsert(vector *v, const void *elemAddr, int position)
     memcpy((char*)targetAddress+v->elemSize, buffer, sizetoMove);
 }
 
+
 void VectorAppend(vector *v, const void *elemAddr)
 {
     if (v->vectorLength == v->maxVectorLength) {
@@ -75,9 +82,10 @@ void VectorAppend(vector *v, const void *elemAddr)
     v->vectorLength++;
 }
 
+
 void VectorDelete(vector *v, int position)
 {
-    assert(position>0 || position < v->vectorLength);
+    assert(position>=0 || position < v->vectorLength);
     void* targetAddress = (char*)v->elements + (position+v->elemSize);
     if(v->freeFn != NULL) {
         v->freeFn(targetAddress);
@@ -86,18 +94,46 @@ void VectorDelete(vector *v, int position)
     memmove(targetAddress, (char*)targetAddress+1, sizetoMove);
 }
 
+
 void VectorSort(vector *v, VectorCompareFunction compare)
-{return;}
+{
+    assert(compare != NULL);
+    qsort(v->elements, v->vectorLength, v->elemSize, compare);
+    return;
+}
+
 
 void VectorMap(vector *v, VectorMapFunction mapFn, void *auxData)
 {
+    assert(mapFn != NULL);
     for (int i=0; i < v->vectorLength; i++) {
         mapFn((char*)v->elements+(i*v->elemSize), auxData);
     } 
     return;
 }
 
+
 static const int kNotFound = -1;
 
-int VectorSearch(const vector *v, const void *key, VectorCompareFunction searchFn, int startIndex, bool isSorted)
-{ return kNotFound; } 
+int VectorSearch(const vector *v, const void *key, VectorCompareFunction searchFn, int startIndex,
+        bool isSorted)
+{ 
+    assert(startIndex>=0 || startIndex < (v->vectorLength) || searchFn != NULL);
+    if (isSorted) {
+        void* found = bsearch(key, (char*)v->elements + (startIndex*v->elemSize),
+                v->vectorLength-startIndex, v->elemSize, searchFn);
+        if (found != NULL){
+            return ((char*)v->elements - (char*)found)/v->elemSize;
+        }
+        return kNotFound;
+    }
+    for (int i = startIndex; i<v->vectorLength; i++) {
+        if (searchFn((char*)v->elements + (i*v->elemSize), key) == 0) {
+            return i;
+        }
+    }
+    return kNotFound;
+} 
+
+
+
