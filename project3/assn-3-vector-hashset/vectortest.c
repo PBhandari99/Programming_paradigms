@@ -192,6 +192,7 @@ static void SimpleTest()
 {
   fprintf(stdout, " ------------------------- Starting the basic test...\n");
   vector alphabet;
+  printf("vector initialize.");
   VectorNew(&alphabet, sizeof(char), NULL, 4);
   TestAppend(&alphabet);
   TestSortSearch(&alphabet);
