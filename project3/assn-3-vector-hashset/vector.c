@@ -45,7 +45,7 @@ void *VectorNth(const vector *v, int position)
 void VectorReplace(vector *v, const void *elemAddr, int position)
 {
     assert(position>=0 || position < v->vectorLength);
-    void* targetAddress = (char*)v->elements + (position + v->elemSize);
+    void* targetAddress = (char*)v->elements + (position * v->elemSize);
     if(v->freeFn != NULL) {
         v->freeFn(targetAddress);
     }
@@ -62,11 +62,12 @@ void VectorInsert(vector *v, const void *elemAddr, int position)
         assert(v->elements != NULL);
     }
     void* targetAddress = (char*)v->elements + (v->elemSize*position);
-    int sizetoMove = (v->vectorLength - position - 1)*v->elemSize;
+    int sizetoMove = (v->vectorLength - position)*v->elemSize;
     char buffer[sizetoMove];
     memcpy(buffer,targetAddress, sizetoMove);
     memmove(targetAddress, elemAddr, v->elemSize);
     memcpy((char*)targetAddress+v->elemSize, buffer, sizetoMove);
+    v->vectorLength++;
 }
 
 
@@ -86,12 +87,13 @@ void VectorAppend(vector *v, const void *elemAddr)
 void VectorDelete(vector *v, int position)
 {
     assert(position>=0 || position < v->vectorLength);
-    void* targetAddress = (char*)v->elements + (position+v->elemSize);
+    void* targetAddress = (char*)v->elements + (position*v->elemSize);
     if(v->freeFn != NULL) {
         v->freeFn(targetAddress);
     }
-    int sizetoMove = (v->vectorLength - position - 1)*v->elemSize;
-    memmove(targetAddress, (char*)targetAddress+1, sizetoMove);
+    int sizetoMove = (v->vectorLength - position -1)*v->elemSize;
+    memmove(targetAddress, (char*)targetAddress+v->elemSize, sizetoMove);
+    v->vectorLength--;
 }
 
 

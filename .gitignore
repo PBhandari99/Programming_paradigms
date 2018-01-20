@@ -62,3 +62,6 @@ assn-3-vector-hashset-data
 *imdb-test-linux
 thesaurus-lookup-linux
 thesaurus-lookup-solaris
+vector-test
+
+Makefile.dependencies
