@@ -26,7 +26,7 @@ typedef int (*HashSetHashFunction)(const void *elemAddr, int numBuckets);
  * ----------------------------
  * Class of function designed to compare two elements, each identified
  * by address.  The HashSetCompareFunction compares these elements and
- * decides whether or not they are logically equal or or.  The
+ * decides whether or not they are logically equal.  The
  * return value identifies relative ordering:
  * 
  *   - A negative return value means that the item addressed by elemAddr1
@@ -43,7 +43,7 @@ typedef int (*HashSetCompareFunction)(const void *elemAddr1, const void *elemAdd
 /**
  * Type: HashSetMapFunction
  * ------------------------
- * Class of function that can me mapped over the elements stored in a hashset.
+ * Class of function that can be mapped over the elements stored in a hashset.
  * These map functions accept a pointer to a client element and a pointer
  * to a piece of auxiliary data passed in as the second argument to HashSetMap.
  */
@@ -73,7 +73,13 @@ typedef void (*HashSetFreeFunction)(void *elemAddr);
  */
 
 typedef struct {
-  // to be filled in by you
+    void* elements;
+    int setSize;
+    int elemSize;
+    int numBuckets;
+    HashSetCompareFunction comparefn;
+    HashSetHashFunction hashfn;
+    HashSetFreeFunction freefn;
 } hashset;
 
 /**
