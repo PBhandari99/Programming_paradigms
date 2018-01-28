@@ -1,4 +1,5 @@
 #include "hashset.h"
+#include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,13 +9,11 @@ void HashSetNew(hashset *h, int elemSize, int numBuckets,
                 HashSetFreeFunction freefn)
 {
     // Pointers to the vectors where the data is.
-    h->elements = malloc(numBuckets*sizeof(vector*));
-    for (int i=0; i<numBuckets; ++i) {
-        void* target = (char*)h->elements + (i*sizeof(vector*)); 
-        target = malloc(sizeof(vector));
-        vector newVector;
-        memcpy(target, &newVector, sizeof(vector));
-        VectorNew((vector*)target, elemSize, freefn, 1);
+    h->elements = (vector*)malloc(numBuckets*sizeof(vector));
+    for (int i=0; i<numBuckets; i++) {
+        printf("%d\n", i);
+        vector* target = (h->elements + i);
+        VectorNew(target, elemSize, freefn, 1);
     }
     h->setSize = 0;
     h->elemSize = elemSize;
@@ -27,7 +26,7 @@ void HashSetNew(hashset *h, int elemSize, int numBuckets,
 void HashSetDispose(hashset *h)
 {
     for (int i=0; i<h->numBuckets; ++i) {
-        VectorDispose((vector*)(char*)h->elements + (i*sizeof(vector*)));
+        VectorDispose(h->elements + i);
     }
     free(h->elements);
     h->setSize = 0;
@@ -44,14 +43,8 @@ void HashSetMap(hashset *h, HashSetMapFunction mapfn, void *auxData)
 {
     assert(mapfn != NULL);
     for (int i=0; i<h->numBuckets; ++i) {
-        void* targetVector = (char*)h->elements + (i*sizeof(vector*));
-        int vectorLength = VectorLength((vector*)targetVector);
-        if (vectorLength<0) {
-            for (int j=0; j<vectorLength; ++j){
-                void* elem = VectorNth((vector*)targetVector, j);
-                mapfn(elem, auxData);
-            } 
-        }
+        vector* targetVector = h->elements + i;
+        VectorMap(targetVector, mapfn, auxData);
     }
 }
 
@@ -62,34 +55,33 @@ void HashSetEnter(hashset *h, const void *elemAddr)
     int hash_loc = h->hashfn(elemAddr, h->numBuckets);
     assert(hash_loc >=0 && hash_loc < h->numBuckets);
 
-    void* targetVector = (char*)h->elements + (hash_loc*sizeof(vector*));
-    int vectorLength = VectorLength((vector*)targetVector);
+    vector* targetVector = h->elements + (hash_loc);
+    int vectorLength = VectorLength(targetVector);
     if(vectorLength>0) {
         for(int i=0; i<vectorLength; ++i) {
-            int compare = h->comparefn(elemAddr, VectorNth((vector*)targetVector, i));
+            int compare = h->comparefn(elemAddr, VectorNth(targetVector, i));
             if(compare==0) {
-               VectorReplace((vector*)targetVector, elemAddr, i);
+               VectorReplace(targetVector, elemAddr, i);
                return;
             }
         }        
     }
-    VectorAppend((vector*)targetVector, elemAddr);
+    VectorAppend(targetVector, elemAddr);
     h->setSize++;
 }
 
 
 void *HashSetLookup(const hashset *h, const void *elemAddr)
 { 
-    assert(elemAddr == NULL);
+    assert(elemAddr != NULL);
     int hash_loc = h->hashfn(elemAddr, h->numBuckets);
     assert(hash_loc >=0 && hash_loc < h->numBuckets);
-    void* targetVector = (char*)h->elements + (hash_loc*sizeof(vector*));
-
-    int vectorLength = VectorLength((vector*)targetVector);
+    vector* targetVector = h->elements + (hash_loc);
+    int vectorLength = VectorLength(targetVector);
     if(vectorLength>0) {
         for(int i=0; i<vectorLength; ++i) {
-            void* vectElement = VectorNth((vector*)targetVector, i);
-            int compare = h->comparefn(elemAddr, VectorNth((vector*)targetVector, i));
+            void* vectElement = VectorNth(targetVector, i);
+            int compare = h->comparefn(elemAddr, VectorNth(targetVector, i));
             if(compare==0) {
                return vectElement;
             }

@@ -142,7 +142,6 @@ static void TestHashTable(void)
   vector sortedCounts;
   
   HashSetNew(&counts, sizeof(struct frequency), kNumBuckets, HashFrequency, CompareLetter, NULL);
-  
   fprintf(stdout, "\n\n ------------------------- Starting the HashTable test\n");
   BuildTableOfLetterCounts(&counts);
   

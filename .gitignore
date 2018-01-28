@@ -63,5 +63,6 @@ assn-3-vector-hashset-data
 thesaurus-lookup-linux
 thesaurus-lookup-solaris
 vector-test
+hashset-test
 
 Makefile.dependencies
