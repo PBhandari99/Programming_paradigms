@@ -8,8 +8,11 @@
 void VectorNew(vector *v, int elemSize, VectorFreeFunction freeFn, int initialAllocation)
 {
     assert(elemSize >= 0);
-    assert(initialAllocation > 0);
+    assert(initialAllocation >= 0);
     v->elemSize = elemSize;
+    if (initialAllocation == 0) {
+        initialAllocation = 4;
+    }
     v->maxVectorLength = initialAllocation;
     v->vectorLength = 0;
     v->elements = malloc(initialAllocation * elemSize);
