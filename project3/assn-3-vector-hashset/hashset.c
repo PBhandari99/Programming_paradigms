@@ -8,12 +8,11 @@ void HashSetNew(hashset *h, int elemSize, int numBuckets,
 		HashSetHashFunction hashfn, HashSetCompareFunction comparefn,
                 HashSetFreeFunction freefn)
 {
-    // Pointers to the vectors where the data is.
+    // Array of vectors where the data is.
     h->elements = (vector*)malloc(numBuckets*sizeof(vector));
     for (int i=0; i<numBuckets; i++) {
-        printf("%d\n", i);
         vector* target = (h->elements + i);
-        VectorNew(target, elemSize, freefn, 1);
+        VectorNew(target, elemSize, freefn, 2);
     }
     h->setSize = 0;
     h->elemSize = elemSize;
